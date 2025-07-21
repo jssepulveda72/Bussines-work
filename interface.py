@@ -5,8 +5,6 @@ from predictions import model_training, predict_new_values
 
 st.set_page_config(page_title="Business Analysis", layout="wide")
 
-if 'Total' not in state:
-    state.total = True
 
 sales = load_local_data()
 sales = numerical_na_fill(sales)
@@ -30,7 +28,7 @@ with daily:
 
     st.header("Daily Sales Analysis")
 
-    col1_d, col2_d, col3_d = st.columns([3,1,1])
+    col1_d, col2_d, col3_d, col4_d = st.columns([2,1,1,1])
 
     with col1_d:
         items_day = st.pills('Item', 
@@ -38,18 +36,21 @@ with daily:
                 key='item_selection',
                 selection_mode='multi',
                 default = None)
-
+        
     with col2_d:
+        total_day = st.checkbox('Show Total', value=True, key='show_total')
+
+    with col3_d:
         kind_day = st.selectbox('Graph Type', ['Bar', 'Line'],
                                 key='graph_type_day')
 
-    with col3_d:
+    with col4_d:
         variable_day = st.selectbox('Variable', ['Total Spent', 'Quantity'],
                                     key='variable_day')
 
 
-    item_per_day = daily_grouper(sales, sales['Item'].unique().tolist(), state.total, variable_day)
-    chart_daily = bar_line_graphs(item_per_day, kind_day, variable_day, state.total, 'Day of Week')
+    item_per_day = daily_grouper(sales, sales['Item'].unique().tolist(), total_day, variable_day)
+    chart_daily = bar_line_graphs(item_per_day, kind_day, variable_day, total_day, 'Day of Week')
 
     if 'chart_daily' not in st.session_state:
             state.chart_daily = chart_daily
@@ -63,8 +64,8 @@ with daily:
         else:
             state.total = False
 
-        item_per_day = daily_grouper(sales, items_day, state.total, variable_day)
-        chart_daily = bar_line_graphs(item_per_day, kind_day, variable_day, state.total, 'Day of Week')
+        item_per_day = daily_grouper(sales, items_day, total_day, variable_day)
+        chart_daily = bar_line_graphs(item_per_day, kind_day, variable_day, total_day, 'Day of Week')
         state.chart_daily = chart_daily
         state.df_daily = item_per_day
 
@@ -86,7 +87,7 @@ with monthly:
 
     st.header("Monthly Sales Analysis")
 
-    col1_m, col2_m, col3_m, col4_m = st.columns([2,1,1,1])
+    col1_m, col2_m, col3_m, col4_m, col5_m = st.columns([2,1,1,1,1])
 
     with col1_m:
         items_month = st.pills('Item', 
@@ -94,21 +95,26 @@ with monthly:
                 key='item_selection_m',
                 selection_mode='multi',
                 default = None)
-
+        
     with col2_m:
+        season = st.checkbox('Seasonal Analysis', value=False, key='seasonal_analysis')
+
+    with col3_m:
+        total_month = st.checkbox('Show Total', value=True, key='show_total_m')
+
+    with col4_m:
         kind_month = st.selectbox('Graph Type', ['Bar', 'Line'],
                                 key='graph_type_month')
 
-    with col3_m:
+    with col5_m:
         variable_month = st.selectbox('Variable', ['Total Spent', 'Quantity'],
                                     key='variable_month')
         
-    with col4_m:
-        season = st.checkbox('Seasonal Analysis', value=False, key='seasonal_analysis')
+    
 
 
-    item_per_month = monthly_grouper(sales, sales['Item'].unique().tolist() , state.total, variable_month, season)
-    chart_month = bar_line_graphs(item_per_month, kind_month, variable_month, state.total, 'Month')
+    item_per_month = monthly_grouper(sales, sales['Item'].unique().tolist() , total_month, variable_month, season)
+    chart_month = bar_line_graphs(item_per_month, kind_month, variable_month, total_month, 'Month')
 
     if 'chart_month' not in st.session_state:
             state.chart_month = chart_month
@@ -122,8 +128,8 @@ with monthly:
         else:
             state.total = False
 
-        item_per_month = monthly_grouper(sales, items_month, state.total, variable_month, season)
-        chart_month = bar_line_graphs(item_per_month, kind_month, variable_month, state.total, 'Month')
+        item_per_month = monthly_grouper(sales, items_month, total_month, variable_month, season)
+        chart_month = bar_line_graphs(item_per_month, kind_month, variable_month, total_month, 'Month')
         state.chart_month = chart_month
         state.df_month = item_per_month
 
